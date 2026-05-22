@@ -1,4 +1,4 @@
-using System;
+using UnityEditor.Rendering;
 using UnityEngine;
 
 public class CarSpawner : MonoBehaviour
@@ -14,8 +14,16 @@ public class CarSpawner : MonoBehaviour
 
     #region Unity API
 
-    public void Start() => SpawnOneCar();
+    public void Start()
 
+    {
+        SpawnOneCar();
+    }
+
+    public void Update()
+    {
+        ImpulseCar();
+    }
     #endregion
 
 
@@ -29,9 +37,16 @@ public class CarSpawner : MonoBehaviour
             return;
         }
 
-        Instantiate(m_car, spawnPosition.position, Quaternion.Euler(0, 90, 0));
+        _spawnedCar = Instantiate(m_car, spawnPosition.position, Quaternion.Euler(0, 90, 0));
+        Rigidbody rb = _spawnedCar.GetComponent<Rigidbody>();
+    }
 
+    private void ImpulseCar()
+    {
+        if (_spawnedCar == null)
+            return;
 
+        _spawnedCar.transform.position += _spawnedCar.transform.forward * m_speed * Time.deltaTime;
     }
 
     #endregion
@@ -42,5 +57,8 @@ public class CarSpawner : MonoBehaviour
 
 
     #region Private and Protected
+
+    private GameObject _spawnedCar;
+
     #endregion
 }
