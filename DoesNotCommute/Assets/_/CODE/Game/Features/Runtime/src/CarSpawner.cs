@@ -1,64 +1,86 @@
-using UnityEditor.Rendering;
 using UnityEngine;
+using System;
 
-public class CarSpawner : MonoBehaviour
+public class SpawnManager : MonoBehaviour
 {
     #region Publics
-
-    public GameObject m_car;
-    public float m_speed;
-    public Transform spawnPosition;
-
     #endregion
 
 
     #region Unity API
 
     public void Start()
-
     {
-        SpawnOneCar();
+        SpawnNextCar();
     }
 
-    public void Update()
-    {
-        ImpulseCar();
-    }
     #endregion
 
 
     #region Main API
 
-    private void SpawnOneCar()
+    public void SpawnNextCar()
     {
-        if (m_car == null)
+       
+        if (_currentSequenceIndex >= m_spawnSequence.Length)
         {
-            Debug.Log("Careful it's empty you fat head");
+            Debug.Log(" Level finished.");
+            
             return;
         }
 
-        _spawnedCar = Instantiate(m_car, spawnPosition.position, Quaternion.Euler(0, 90, 0));
-        Rigidbody rb = _spawnedCar.GetComponent<Rigidbody>();
-    }
+        
+        SpawnData currentData = m_spawnSequence[_currentSequenceIndex];
 
-    private void ImpulseCar()
-    {
-        if (_spawnedCar == null)
+        
+        if (currentData.carPrefab == null || currentData.spawnPoint == null)
+        {
+            Debug.LogWarning($"SpawnManager: index missing data {_currentSequenceIndex} you fat head");
             return;
+        }
 
-        _spawnedCar.transform.position += _spawnedCar.transform.forward * m_speed * Time.deltaTime;
+        if (m_gameManager == null)
+        {
+            Debug.LogError("SpawnManager: There's no Game Manager you dummy");
+            return;
+        }
+
+        
+        GameObject spawnedCar = Instantiate(currentData.carPrefab, currentData.spawnPoint.position, currentData.spawnPoint.rotation);
+        CarControl carControl = spawnedCar.GetComponent<CarControl>();
+
+        if (carControl != null)
+        {
+           
+            m_gameManager.RegisterActiveCar(carControl);
+            _currentSequenceIndex++;
+        }
+        else
+        {
+            Debug.LogError($"The prefab {currentData.carPrefab.name} has no component CarControl attached");
+        }
     }
 
     #endregion
 
 
     #region Tools and Utilities
+
+    [Serializable]
+    private struct SpawnData
+    {
+        public GameObject carPrefab;
+        public Transform spawnPoint;
+    }
+
     #endregion
 
 
     #region Private and Protected
 
-    private GameObject _spawnedCar;
+    [SerializeField] private GameManager m_gameManager;
+    [SerializeField] private SpawnData[] m_spawnSequence;
+    private int _currentSequenceIndex = 0;
 
     #endregion
 }
