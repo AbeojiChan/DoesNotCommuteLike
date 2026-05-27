@@ -1,6 +1,5 @@
-using UnityEngine;
 using TMPro;
-using Mono.Cecil;
+using UnityEngine;
 public class SimpleTimer : MonoBehaviour
 {
     #region Publics
@@ -41,6 +40,14 @@ public class SimpleTimer : MonoBehaviour
             _isRunning = false;
             TimerEnded();
         }
+    }
+
+    public void AddTime(float bonusTime)
+    {
+        _setTime += bonusTime;
+
+        UpdateUIText();
+
     }
 
     private void UpdateUIText()

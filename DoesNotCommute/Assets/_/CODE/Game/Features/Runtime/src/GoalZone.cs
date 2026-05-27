@@ -12,20 +12,18 @@ public class GoalZone : MonoBehaviour
     {
         DetectArrival(other);
     }
+
     #endregion
 
 
     #region Main API
 
-    private void DetectArrival(Collider other)
+  
+    public void Initialize(GameManager gm)
     {
-        CarControl arrivingCar = other.GetComponent<CarControl>();
-
-        if (arrivingCar != null && m_gameManager != null)
-        {
-            m_gameManager.NotifyCarArrived(arrivingCar);
-        }
+        _gameManager = gm;
     }
+
     #endregion
 
 
@@ -35,7 +33,18 @@ public class GoalZone : MonoBehaviour
 
     #region Private and Protected
 
-    [SerializeField] private GameManager m_gameManager;
+   
+    private GameManager _gameManager;
+
+    private void DetectArrival(Collider other)
+    {
+        CarControl arrivingCar = other.GetComponent<CarControl>();
+
+        if (arrivingCar != null && _gameManager != null)
+        {
+            _gameManager.NotifyCarArrived(arrivingCar);
+        }
+    }
 
     #endregion
 }
