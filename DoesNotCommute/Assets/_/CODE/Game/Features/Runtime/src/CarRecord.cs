@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(CarControl))]
+[RequireComponent(typeof(Rigidbody))]
 public class GhostController : MonoBehaviour
 {
     #region Publics
@@ -10,9 +10,17 @@ public class GhostController : MonoBehaviour
 
     #region Unity API
 
-    private void Update()
+    private void FixedUpdate()
     {
-        PlayCassette();
+      
+        if (!_isPlaying || _cassette == null || _currentIndex >= _cassette.Count)
+            return;
+
+     
+        transform.position = _cassette[_currentIndex].position;
+        transform.rotation = _cassette[_currentIndex].rotation;
+
+        _currentIndex++;
     }
 
     #endregion
@@ -20,28 +28,29 @@ public class GhostController : MonoBehaviour
 
     #region Main API
 
-  
-    public void InitializeGhost(List<SteerRecord> records)
+    public void InitializeGhost(List<MoveSnapshot> records)
     {
         _cassette = records;
         _currentIndex = 0;
-        _currentPlaybackTime = 0f;
-        _carControl = GetComponent<CarControl>();
+        _isPlaying = false;
+
+        _rigidbody = GetComponent<Rigidbody>();
+        if (_rigidbody != null)
+        {
+           
+            _rigidbody.isKinematic = true;
+        }
 
         if (_cassette != null && _cassette.Count > 0)
         {
-            _carControl.SetSteeringInput(_cassette[0].steerValue);
+            transform.position = _cassette[0].position;
+            transform.rotation = _cassette[0].rotation;
         }
     }
 
     public void StartPlayback()
     {
-        _isWaitingForGreenLight = false;
-
-        if (_carControl != null)
-        {
-            _carControl.StartEngine();
-        }
+        _isPlaying = true;
     }
 
     #endregion
@@ -53,40 +62,10 @@ public class GhostController : MonoBehaviour
 
     #region Private and Protected
 
-    private CarControl _carControl;
-    private List<SteerRecord> _cassette;
+    private List<MoveSnapshot> _cassette;
     private int _currentIndex = 0;
-    private float _currentPlaybackTime = 0f;
-    private bool _isWaitingForGreenLight = true;
-
-    private void PlayCassette()
-    {
-        if (_isWaitingForGreenLight || _cassette == null || _carControl == null || _currentIndex >= _cassette.Count)
-            return;
-
-        if (_cassette == null || _carControl == null || _currentIndex >= _cassette.Count)
-            return;
-
-        _currentPlaybackTime += Time.deltaTime;
-
-        if (_currentIndex + 1 < _cassette.Count)
-        {
-            if (_currentPlaybackTime >= _cassette[_currentIndex + 1].timestamp)
-            {
-          
-                _currentIndex++;
-
-                _carControl.SetSteeringInput(_cassette[_currentIndex].steerValue);
-            }
-        }
-        else
-        {
-
-            _carControl.StopEngine();
-            
-            _cassette = null;
-        }
-    }
+    private bool _isPlaying = false;
+    private Rigidbody _rigidbody;
 
     #endregion
 }

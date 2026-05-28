@@ -504,6 +504,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CarControl
   m_forwardSpeed: 30
   m_turnSpeed: 150
+  m_bounceForce: 25
+  m_stunDuration: 0.3
 --- !u!54 &6831509704959072346
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -550,8 +552,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 3, y: 3, z: 9.5}
-  m_Center: {x: 0, y: 1.5, z: -0.5}
+  m_Size: {x: 3, y: 2.4640684, z: 8.907819}
+  m_Center: {x: 0, y: 1.7320342, z: -0.4570775}
 --- !u!114 &-3490824651881470728
 MonoBehaviour:
   m_ObjectHideFlags: 0

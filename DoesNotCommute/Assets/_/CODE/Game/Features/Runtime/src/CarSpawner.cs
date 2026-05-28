@@ -20,7 +20,7 @@ public class SpawnManager : MonoBehaviour
 
     #region Main API
 
-    public void ArchiveAndDeployNext(List<SteerRecord> finishedCassette)
+    public void ArchiveAndDeployNext(List<MoveSnapshot> finishedCassette)
     {
         int finishedIndex = _currentSequenceIndex - 1;
 
@@ -31,11 +31,11 @@ public class SpawnManager : MonoBehaviour
             GhostArchive newArchive = new GhostArchive(
                 finishedData.carPrefab,
                 finishedData.spawnPoint,
-                new List<SteerRecord>(finishedCassette)
+                new List<MoveSnapshot>(finishedCassette)
             );
 
             _ghostArchives.Add(newArchive);
-            Debug.Log($"Total ghosts in memory : {_ghostArchives.Count}");
+            Debug.Log($"SpawnManager: Total ghosts in memory: {_ghostArchives.Count}");
         }
 
         ClearBoard();
@@ -46,7 +46,7 @@ public class SpawnManager : MonoBehaviour
     {
         if (_currentSequenceIndex >= m_spawnSequence.Length)
         {
-            Debug.Log(" Level finished.");
+            Debug.Log("SpawnManager: Level finished.");
             return;
         }
 
@@ -56,7 +56,6 @@ public class SpawnManager : MonoBehaviour
             _spawnedEntities.Add(ghostCar);
 
             GhostController ghostController = ghostCar.GetComponent<GhostController>();
-
             if (ghostController != null)
             {
                 _activeGhosts.Add(ghostController);
@@ -64,53 +63,82 @@ public class SpawnManager : MonoBehaviour
             }
         }
 
-
         SpawnData currentData = m_spawnSequence[_currentSequenceIndex];
 
         if (currentData.carPrefab == null || currentData.spawnPoint == null)
         {
-            Debug.LogWarning($"SpawnManager: index missing data {_currentSequenceIndex} you fat head");
+            Debug.LogWarning($"SpawnManager: Sequence data missing at index {_currentSequenceIndex}.");
             return;
         }
 
         if (m_gameManager == null)
         {
-            Debug.LogError("SpawnManager: There's no Game Manager you dummy");
+            Debug.LogError("SpawnManager: GameManager reference is missing.");
             return;
         }
-
 
         GameObject spawnedCar = Instantiate(currentData.carPrefab, currentData.spawnPoint.position, currentData.spawnPoint.rotation);
         _spawnedEntities.Add(spawnedCar);
 
         CarControl carControl = spawnedCar.GetComponent<CarControl>();
-
         if (carControl != null)
         {
             m_gameManager.RegisterActiveCar(carControl);
         }
         else
         {
-            Debug.LogError($"The prefab {currentData.carPrefab.name} has no component CarControl attached");
+            Debug.LogError($"SpawnManager: The prefab {currentData.carPrefab.name} is missing the CarControl component.");
+            return;
         }
 
+        GameObject spawnedGoal = null;
 
         if (currentData.goalPrefab != null && currentData.goalPoint != null)
         {
-            GameObject spawnedGoal = Instantiate(currentData.goalPrefab, currentData.goalPoint.position, currentData.goalPoint.rotation);
+            spawnedGoal = Instantiate(currentData.goalPrefab, currentData.goalPoint.position, currentData.goalPoint.rotation);
             _spawnedEntities.Add(spawnedGoal);
 
             GoalZone goalZone = spawnedGoal.GetComponent<GoalZone>();
-
-            if (goalZone != null && m_gameManager != null)
+            if (goalZone != null)
             {
-
                 goalZone.Initialize(m_gameManager);
             }
         }
+        else
+        {
+            Debug.LogWarning($"SpawnManager: Goal prefab or spawn point missing at index {_currentSequenceIndex}.");
+        }
 
+        if (m_uiCompass != null && spawnedCar != null && spawnedGoal != null)
+        {
+            m_uiCompass.SetTracking(spawnedCar.transform, spawnedGoal.transform);
+        }
+        else if (m_uiCompass != null)
+        {
+            m_uiCompass.StopTracking();
+        }
 
         _currentSequenceIndex++;
+    }
+
+    public void RetryCurrentCar()
+    {
+        Debug.Log($"SpawnManager: Rewind requested. Current index: {_currentSequenceIndex}");
+
+        if (_currentSequenceIndex > 0)
+        {
+            _currentSequenceIndex--;
+        }
+
+        Debug.Log($"SpawnManager: Index decremented to {_currentSequenceIndex}. Board cleanup initiated...");
+
+        ClearBoard();
+
+        Debug.Log("SpawnManager: Cleanup complete. Relaunching spawn sequence...");
+
+        SpawnNextCar();
+
+        Debug.Log("SpawnManager: New car deployed successfully.");
     }
 
     public void TurnGreenLight()
@@ -118,6 +146,30 @@ public class SpawnManager : MonoBehaviour
         foreach (GhostController ghost in _activeGhosts)
         {
             if (ghost != null) ghost.StartPlayback();
+        }
+    }
+
+    private void ClearBoard()
+    {
+        if (_spawnedEntities == null)
+        {
+            _spawnedEntities = new List<GameObject>();
+            Debug.LogWarning("SpawnManager: Warning - _spawnedEntities list was not initialized.");
+        }
+
+        foreach (GameObject entity in _spawnedEntities)
+        {
+            if (entity != null)
+            {
+                Destroy(entity);
+            }
+        }
+
+        _spawnedEntities.Clear();
+
+        if (_activeGhosts != null)
+        {
+            _activeGhosts.Clear();
         }
     }
 
@@ -140,9 +192,9 @@ public class SpawnManager : MonoBehaviour
     {
         public GameObject carPrefab;
         public Transform spawnPoint;
-        public List<SteerRecord> cassette;
+        public List<MoveSnapshot> cassette;
 
-        public GhostArchive(GameObject prefab, Transform point, List<SteerRecord> records)
+        public GhostArchive(GameObject prefab, Transform point, List<MoveSnapshot> records)
         {
             carPrefab = prefab;
             spawnPoint = point;
@@ -156,6 +208,7 @@ public class SpawnManager : MonoBehaviour
     #region Private and Protected
 
     [SerializeField] private GameManager m_gameManager;
+    [SerializeField] private CanvasCompass m_uiCompass;
     [SerializeField] private SpawnData[] m_spawnSequence;
 
     private int _currentSequenceIndex = 0;
@@ -164,21 +217,6 @@ public class SpawnManager : MonoBehaviour
     private List<GameObject> _spawnedEntities = new List<GameObject>();
     private List<GhostController> _activeGhosts = new List<GhostController>();
 
-    private void ClearBoard()
-    {
-        foreach (GameObject entity in _spawnedEntities)
-        {
-            if (entity != null)
-            {
-                Destroy(entity);
-            }
-        }
-
-        _spawnedEntities.Clear();
-        _activeGhosts.Clear(); 
-
-        Debug.Log("Clean slate");
-    }
 
     #endregion 
 }

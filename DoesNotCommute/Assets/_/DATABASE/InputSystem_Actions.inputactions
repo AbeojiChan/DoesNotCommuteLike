@@ -1004,6 +1004,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "rewind",
+                    "type": "Button",
+                    "id": "e71cc9f9-d316-45a5-81f7-2e998524189f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -1021,7 +1030,7 @@
                 {
                     "name": "negative",
                     "id": "c2bbefde-ade6-4150-8aca-356d890aa97d",
-                    "path": "<Keyboard>/leftArrow",
+                    "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -1032,13 +1041,24 @@
                 {
                     "name": "positive",
                     "id": "fb7e9ef3-1908-423a-b96a-3cc591d7a3b6",
-                    "path": "<Keyboard>/rightArrow",
+                    "path": "<Keyboard>/d",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Steer",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "1fd75c84-3784-4a4a-ba8c-d97026bcc976",
+                    "path": "<Keyboard>/r",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "rewind",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
