@@ -77,7 +77,6 @@ public class GameManager : MonoBehaviour
     public void RegisterActiveCar(CarControl newCar)
     {
         _activeCar = newCar;
-        Debug.Log($"GameManager: New target locked -> {newCar.gameObject.name}");
 
         _isCountingDown = true;
         _currentDelayTimer = m_startDelay;
@@ -104,8 +103,6 @@ public class GameManager : MonoBehaviour
     {
         if (arrivedCar == _activeCar)
         {
-            Debug.Log($"GameManager: Car {arrivedCar.gameObject.name} has arrived.");
-
             _activeCar.StopEngine();
             _activeCar = null;
 
@@ -119,10 +116,6 @@ public class GameManager : MonoBehaviour
             {
                 m_carSpawner.ArchiveAndDeployNext(_currentRunRecords);
             }
-            else
-            {
-                Debug.LogWarning("GameManager: Next car unassigned.");
-            }
         }
     }
 
@@ -130,14 +123,11 @@ public class GameManager : MonoBehaviour
     {
         if (_activeCar == null && !_isCountingDown) return;
 
-        Debug.Log("GameManager: Temporal anomaly detected. Rewinding timeline.");
-
         Time.timeScale = 1f;
 
         if (!_isCountingDown)
         {
             float timeToRefund = _timeSpentThisTurn - 1f;
-            Debug.Log($"GameManager: Time elapsed: {_timeSpentThisTurn:F1}s | Refund (with penalty): {timeToRefund:F1}s");
         }
 
         foreach (TimePickup pickup in _collectedPickupsThisTurn)
@@ -211,8 +201,6 @@ public class GameManager : MonoBehaviour
     public void NotifyTimePickupCollected(TimePickup pickup)
     {
         _collectedPickupsThisTurn.Add(pickup);
-
-        Debug.Log($"GameManager: Time pickup collected. Bonus: +{pickup.m_timeBonus}s");
 
     }
 

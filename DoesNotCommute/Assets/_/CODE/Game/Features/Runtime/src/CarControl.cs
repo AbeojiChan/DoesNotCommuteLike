@@ -55,7 +55,6 @@ public class CarControl : MonoBehaviour
         {
             _isDamaged = true;
             _currentForwardSpeed /= 2f;
-            Debug.Log($"💥 CRASH ! Le moteur est endommagé. Vitesse réduite à : {_currentForwardSpeed}");
         }
     }
 

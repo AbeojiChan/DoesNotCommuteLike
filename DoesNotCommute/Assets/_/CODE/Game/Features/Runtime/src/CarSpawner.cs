@@ -35,7 +35,7 @@ public class SpawnManager : MonoBehaviour
             );
 
             _ghostArchives.Add(newArchive);
-            Debug.Log($"SpawnManager: Total ghosts in memory: {_ghostArchives.Count}");
+           
         }
 
         ClearBoard();
@@ -46,7 +46,6 @@ public class SpawnManager : MonoBehaviour
     {
         if (_currentSequenceIndex >= m_spawnSequence.Length)
         {
-            Debug.Log("SpawnManager: Level finished.");
             return;
         }
 
@@ -67,13 +66,12 @@ public class SpawnManager : MonoBehaviour
 
         if (currentData.carPrefab == null || currentData.spawnPoint == null)
         {
-            Debug.LogWarning($"SpawnManager: Sequence data missing at index {_currentSequenceIndex}.");
+      
             return;
         }
 
         if (m_gameManager == null)
         {
-            Debug.LogError("SpawnManager: GameManager reference is missing.");
             return;
         }
 
@@ -87,7 +85,6 @@ public class SpawnManager : MonoBehaviour
         }
         else
         {
-            Debug.LogError($"SpawnManager: The prefab {currentData.carPrefab.name} is missing the CarControl component.");
             return;
         }
 
@@ -104,11 +101,6 @@ public class SpawnManager : MonoBehaviour
                 goalZone.Initialize(m_gameManager);
             }
         }
-        else
-        {
-            Debug.LogWarning($"SpawnManager: Goal prefab or spawn point missing at index {_currentSequenceIndex}.");
-        }
-
         if (m_uiCompass != null && spawnedCar != null && spawnedGoal != null)
         {
             m_uiCompass.SetTracking(spawnedCar.transform, spawnedGoal.transform);
@@ -123,22 +115,15 @@ public class SpawnManager : MonoBehaviour
 
     public void RetryCurrentCar()
     {
-        Debug.Log($"SpawnManager: Rewind requested. Current index: {_currentSequenceIndex}");
 
         if (_currentSequenceIndex > 0)
         {
             _currentSequenceIndex--;
         }
 
-        Debug.Log($"SpawnManager: Index decremented to {_currentSequenceIndex}. Board cleanup initiated...");
-
         ClearBoard();
-
-        Debug.Log("SpawnManager: Cleanup complete. Relaunching spawn sequence...");
-
         SpawnNextCar();
 
-        Debug.Log("SpawnManager: New car deployed successfully.");
     }
 
     public void TurnGreenLight()
@@ -154,7 +139,6 @@ public class SpawnManager : MonoBehaviour
         if (_spawnedEntities == null)
         {
             _spawnedEntities = new List<GameObject>();
-            Debug.LogWarning("SpawnManager: Warning - _spawnedEntities list was not initialized.");
         }
 
         foreach (GameObject entity in _spawnedEntities)
